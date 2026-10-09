@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClientFlow — Premium Workspace</title>
+<style>
+:root{
+  --bg:#070914;--panel:#101426;--panel2:#151b31;
+  --line:#262e49;--text:#f5f7ff;--muted:#9ba7c5;
+  --purple:#8857ff;--blue:#2865ff;--green:#25dfad;
+}
+*{box-sizing:border-box}
+body{
+ margin:0;background:var(--bg);color:var(--text);
+ font-family:Inter,ui-sans-serif,system-ui,Arial,sans-serif;
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.app{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100vh}
+.sidebar{
+ padding:25px 16px;border-right:1px solid var(--line);
+ background:#090c18;display:flex;flex-direction:column;gap:25px;
+}
+.logo{font-size:24px;font-weight:850;letter-spacing:-1px}
+.logo span{color:#9a78ff}
+.nav{display:grid;gap:8px}
+.nav button{
+ background:transparent;color:#aeb8d2;border:1px solid transparent;
+ text-align:left;padding:13px;border-radius:11px;
+}
+.nav button:hover,.nav button.active{
+ color:white;background:linear-gradient(100deg,#39217b,#15254c);
+ border-color:#6348dc;box-shadow:0 0 20px #6638ff22;
+}
+.side-bottom{margin-top:auto;color:var(--muted);font-size:13px;line-height:1.7}
+main{min-width:0;padding:24px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:24px}
+.search{max-width:470px;width:100%}
+input,textarea,select{
+ width:100%;background:#0b1020;color:white;
+ border:1px solid #2b3451;border-radius:10px;padding:12px;outline:none;
+}
+input:focus,textarea:focus,select:focus{border-color:#8962ff;box-shadow:0 0 0 3px #8857ff20}
+.profile{font-size:13px;color:var(--muted);white-space:nowrap}
+.hero{
+ position:relative;overflow:hidden;border:1px solid #39306a;border-radius:23px;
+ padding:32px;background:
+ radial-gradient(ellipse at 85% 5%,#5731ba70,transparent 43%),
+ radial-gradient(ellipse at 100% 100%,#1646a950,transparent 40%),
+ linear-gradient(120deg,#17152e,#0e1429 65%,#111a35);
+ animation:appear .7s ease both;
+}
+.eyebrow{color:#ad94ff;font-size:12px;font-weight:800;letter-spacing:2px}
+h1{font-size:clamp(34px,5vw,55px);line-height:1.05;letter-spacing:-2px;margin:15px 0}
+.gradient{background:linear-gradient(90deg,#c4a9ff,#688eff);color:transparent;background-clip:text}
+p{color:var(--muted);line-height:1.65}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.btn{border:0;border-radius:10px;padding:12px 17px;font-weight:750;color:white;
+ background:linear-gradient(110deg,var(--purple),var(--blue));
+ box-shadow:0 7px 25px #6445ff35}
+.btn.secondary{background:#171d33;border:1px solid #35405f;box-shadow:none}
+.section-title{font-size:19px;margin:0 0 15px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:20px 0}
+.card{
+ min-width:0;background:linear-gradient(145deg,#13192c,#0c1120);
+ border:1px solid var(--line);border-radius:16px;padding:19px;
+ transition:transform .25s,border-color .25s,box-shadow .25s;
+}
+.card:hover{transform:translateY(-3px);border-color:#6651b6;box-shadow:0 10px 35px #5a3bff12}
+.stat-label{font-size:13px;color:var(--muted)}
+.stat-value{font-size:32px;font-weight:800;margin:12px 0 5px}
+.stat-icon{float:right;border-radius:10px;padding:9px;background:#32235f}
+.workspace{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr);gap:16px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.client-list{display:grid;gap:0}
+.client{
+ display:flex;align-items:center;gap:12px;padding:14px 0;
+ border-bottom:1px solid #222b43;animation:appear .35s ease both
+}
+.client:last-child{border:0}
+.avatar{
+ width:41px;height:41px;flex-shrink:0;display:grid;place-items:center;
+ border-radius:13px;background:linear-gradient(135deg,#7044e9,#1377b9);
+ font-weight:800
+}
+.client-info{min-width:0;flex:1}
+.client-info strong{display:block;overflow-wrap:anywhere;font-size:14px}
+.client-info small{color:var(--muted);overflow-wrap:anywhere}
+.pill{font-size:11px;padding:6px 9px;border-radius:20px;background:#123c35;color:#57f2c5}
+.delete{background:transparent;border:1px solid #35405b;color:#abb8d5;border-radius:8px;padding:7px}
+.form-grid{display:grid;gap:12px}
+label{font-size:12px;color:#b6c1da;display:block;margin-bottom:6px}
+.empty{padding:25px 0;color:var(--muted);text-align:center}
+.toast{margin-top:12px;color:var(--green);font-size:13px}
+footer{text-align:center;color:#66718f;font-size:12px;padding:25px}
+.view{display:none}.view.active{display:block}
+@keyframes appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){
+ .app{grid-template-columns:1fr}
+ .sidebar{padding:13px 15px;border-right:0;border-bottom:1px solid var(--line);gap:12px}
+ .logo{font-size:21px}
+ .nav{display:flex;overflow-x:auto;gap:5px}
+ .nav button{white-space:nowrap;padding:10px;font-size:12px}
+ .side-bottom{display:none}
+ main{padding:15px}
+ .workspace{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+ .topbar{align-items:flex-start;flex-direction:column}
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .hero{padding:23px 18px}
+ .hero h1{letter-spacing:-1.5px}
+ .card{padding:15px}
+ .profile{white-space:normal}
+ .client{gap:9px}
+ .pill{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+ <div class="logo">◈ Client<span>Flow</span></div>
+ <nav class="nav">
+  <button class="active" data-view="dashboard">◫ &nbsp; Dashboard</button>
+  <button data-view="clients-view">♙ &nbsp; Clients</button>
+  <button data-view="projects-view">▣ &nbsp; Projects</button>
+  <button data-view="tasks-view">✓ &nbsp; Tasks</button>
+  <button data-view="notes-view">▤ &nbsp; Notes</button>
+  <button data-view="settings-view">⚙ &nbsp; Settings</button>
+ </nav>
+ <div class="side-bottom">YOUR WORKSPACE<br><strong>Organize. Create. Grow.</strong><br><br>ClientFlow Premium UI</div>
+</aside>
+
+<main>
+ <div class="topbar">
+  <input class="search" id="globalSearch" placeholder="⌕  Search clients, projects, notes..." aria-label="Search">
+  <div class="profile">WORKSPACE &nbsp; / &nbsp; <strong style="color:white">My Business</strong></div>
+ </div>
+
+ <section class="view active" id="dashboard">
+  <div class="hero">
+   <div class="eyebrow">YOUR BUSINESS, IN CONTROL</div>
+   <h1>Manage clients.<br><span class="gradient">Build your dreams.</span></h1>
+   <p>One focused workspace for your clients, projects and next big idea.</p>
+   <div class="actions">
+    <button class="btn" onclick="go('clients-view');document.getElementById('clientName').focus()">＋ Add New Client</button>
+    <button class="btn secondary" onclick="go('projects-view')">View Projects ↗</button>
+   </div>
+  </div>
+
+  <div class="stats">
+   <div class="card"><span class="stat-icon">♙</span><div class="stat-label">Total Clients</div><div class="stat-value" id="clientCount">0</div><div class="stat-label">In your workspace</div></div>
+   <div class="card"><span class="stat-icon">▣</span><div class="stat-label">Projects</div><div class="stat-value" id="projectCount">0</div><div class="stat-label">Tracked projects</div></div>
+   <div class="card"><span class="stat-icon">✓</span><div class="stat-label">Completed</div><div class="stat-value" id="doneCount">0</div><div class="stat-label">Tasks completed</div></div>
+   <div class="card"><span class="stat-icon">✧</span><div class="stat-label">Open Tasks</div><div class="stat-value" id="openCount">0</div><div class="stat-label">Ready for action</div></div>
+  </div>
+
+  <div class="workspace">
+   <section class="card">
+    <div class="row"><h2 class="section-title">Recent Clients</h2><button class="btn secondary" onclick="go('clients-view')">View all</button></div>
+    <div id="recentClients" class="client-list"></div>
+   </section>
+   <section class="card">
+    <h2 class="section-title">Quick Task</h2>
+    <form id="quickTask" class="form-grid">
+     <div><label for="taskName">Task name</label><input id="taskName" placeholder="e.g. Send project proposal" required></div>
+     <div><label for="taskDue">Due date</label><input id="taskDue" type="date"></div>
+     <button class="btn">＋ Create Task</button>
+    </form>
+    <p id="taskMessage" class="toast"></p>
+   </section>
+  </div>
+ </section>
+
+ <section class="view" id="clients-view">
+  <div class="row"><div><div class="eyebrow">RELATIONSHIPS</div><h1>Client <span class="gradient">Directory</span></h1></div></div>
+  <div class="workspace">
+   <section class="card">
+    <div class="row"><h2 class="section-title">All Clients</h2><span id="listCount" class="stat-label">0 clients</span></div>
+    <input id="clientSearch" placeholder="Search your clients...">
+    <div id="allClients" class="client-list"></div>
+   </section>
+   <section class="card">
+    <h2 class="section-title">Add a Client</h2>
+    <form id="clientForm" class="form-grid">
+     <div><label for="clientName">Client name *</label><input id="clientName" placeholder="Company or person" required></div>
+     <div><label for="clientEmail">Email address</label><input id="clientEmail" type="email" placeholder="client@example.com"></div>
+     <div><label for="clientProject">Project / Service</label><input id="clientProject" placeholder="Website design, branding..."></div>
+     <div><label for="clientStatus">Status</label><select id="clientStatus"><option>Active</option><option>In Progress</option><option>Completed</option><option>Lead</option></select></div>
+     <div><label for="clientNotes">Notes</label><textarea id="clientNotes" rows="3" placeholder="Project details..."></textarea></div>
+     <button class="btn">Save Client ↗</button>
+    </form>
+    <div id="clientMessage" class="toast"></div>
+   </section>
+  </div>
+ </section>
+
+ <section class="view" id="projects-view">
+  <div class="eyebrow">DELIVERY WORKSPACE</div><h1>Project <span class="gradient">Studio</span></h1>
+  <div class="workspace">
+   <section class="card"><h2 class="section-title">Create a Project</h2>
+    <form id="projectForm" class="form-grid">
+     <div><label for="projectName">Project name *</label><input id="projectName" required placeholder="Website redesign"></div>
+     <div><label for="projectClient">Client</label><input id="projectClient" placeholder="Client or company"></div>
+     <div><label for="projectStatus">Status</label><select id="projectStatus"><option>In Progress</option><option>Planning</option><option>Completed</option><option>On Hold</option></select></div>
+     <button class="btn">Create Project</button>
+    </form>
+   </section>
+   <section class="card"><h2 class="section-title">Your Projects</h2><div id="allProjects"></div></section>
+  </div>
+ </section>
+
+ <section class="view" id="tasks-view">
+  <div class="eyebrow">STAY ON TRACK</div><h1>Task <span class="gradient">Manager</span></h1>
+  <section class="card"><h2 class="section-title">Your Tasks</h2><div id="allTasks"></div></section>
+ </section>
+
+ <section class="view" id="notes-view">
+  <div class="eyebrow">YOUR THINKING SPACE</div><h1>Quick <span class="gradient">Notes</span></h1>
+  <section class="card">
+   <form id="noteForm" class="form-grid">
+    <div><label for="noteTitle">Note title</label><input id="noteTitle" required placeholder="New idea"></div>
+    <div><label for="noteBody">Note</label><textarea id="noteBody" rows="5" placeholder="Write your ideas here..."></textarea></div>
+    <button class="btn">Save Note</button>
+   </form>
+   <div id="allNotes"></div>
+  </section>
+ </section>
+
+ <section class="view" id="settings-view">
+  <div class="eyebrow">PERSONALIZE YOUR SPACE</div><h1>Workspace <span class="gradient">Settings</span></h1>
+  <section class="card">
+   <h2 class="section-title">Local Workspace</h2>
+   <p>This version saves data in this browser on this device. Online accounts and cloud sync are not connected yet.</p>
+   <button class="btn secondary" id="exportData">Export Workspace JSON</button>
+   <button class="btn secondary" id="clearData">Clear Local Workspace</button>
+   <p id="settingsMessage"></p>
+  </section>
+ </section>
+
+ <footer>CLIENTFLOW · A BETTER WAY TO WORK</footer>
+</main>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const storeKey="clientflow-premium-workspace-v1";
+let data={clients:[],projects:[],tasks:[],notes:[]};
+try{data={...data,...JSON.parse(localStorage.getItem(storeKey)||"{}")}}catch(e){}
+function save(){try{localStorage.setItem(storeKey,JSON.stringify(data));render()}catch(e){alert("Browser storage is unavailable.")}}
+function safe(text){return String(text||"")}
+function go(id){
+ document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
+ document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.view)));
+function element(tag,text,className){
+ const el=document.createElement(tag);el.textContent=text;
+ if(className)el.className=className;return el;
+}
+function clientCard(c,index){
+ const item=element("div","","client");
+ item.append(element("div",safe(c.name).slice(0,2).toUpperCase(),"avatar"));
+ const info=element("div","","client-info");
+ info.append(element("strong",c.name));
+ info.append(element("small",[c.email,c.project].filter(Boolean).join(" · ")||"No additional details"));
+ const status=element("span",c.status||"Active","pill");
+ const del=element("button","×","delete");del.type="button";del.title="Delete client";
+ del.onclick=()=>{if(confirm("Delete this client?")){data.clients=data.clients.filter(x=>x.id!==c.id);save()}};
+ item.append(info,status,del);return item;
+}
+function renderClients(){
+ $("clientCount").textContent=data.clients.length;
+ $("listCount").textContent=data.clients.length+" clients";
+ const query=($("clientSearch")?.value||$("globalSearch").value||"").toLowerCase();
+ const filtered=data.clients.filter(c=>[c.name,c.email,c.project,c.notes].join(" ").toLowerCase().includes(query));
+ ["recentClients","allClients"].forEach(id=>{
+  const box=$(id);box.replaceChildren();
+  const list=id==="recentClients"?filtered.slice(-5).reverse():filtered;
+  if(!list.length)box.append(element("div","No clients yet. Add your first client to get started.","empty"));
+  list.forEach(c=>box.append(clientCard(c)));
+ });
+}
+function render(){
+ $("projectCount").textContent=data.projects.length;
+ $("doneCount").textContent=data.tasks.filter(t=>t.done).length;
+ $("openCount").textContent=data.tasks.filter(t=>!t.done).length;
+ renderClients();
+ $("allProjects").replaceChildren();
+ if(!data.projects.length)$("allProjects").append(element("p","No projects yet.","empty"));
+ data.projects.forEach(p=>{
+  const row=element("div","","client"),info=element("div","","client-info");
+  info.append(element("strong",p.name),element("small",(p.client||"No client")+" · "+p.status));
+  const del=element("button","Delete","delete");del.onclick=()=>{data.projects=data.projects.filter(x=>x.id!==p.id);save()};
+  row.append(info,del);$("allProjects").append(row);
+ });
+ $("allTasks").replaceChildren();
+ if(!data.tasks.length)$("allTasks").append(element("p","No tasks yet.","empty"));
+ data.tasks.forEach(t=>{
+  const row=element("div","","client"),info=element("div","","client-info");
+  const label=element("label",t.name);label.style.margin=0;
+  const check=element("input");check.type="checkbox";check.checked=t.done;check.style.width="auto";
+  check.onchange=()=>{t.done=check.checked;save()};
+  info.append(label,element("small",t.due?"Due: "+t.due:"No due date"));
+  const del=element("button","Delete","delete");del.onclick=()=>{data.tasks=data.tasks.filter(x=>x.id!==t.id);save()};
+  row.append(check,info,del);$("allTasks").append(row);
+ });
+ $("allNotes").replaceChildren();
+ if(!data.notes.length)$("allNotes").append(element("p","Your saved notes will appear here.","empty"));
+ data.notes.slice().reverse().forEach(n=>{
+  const box=element("div","","card");box.style.marginTop="12px";
+  box.append(element("strong",n.title),element("p",n.body));
+  const del=element("button","Delete note","delete");del.onclick=()=>{data.notes=data.notes.filter(x=>x.id!==n.id);save()};
+  box.append(del);$("allNotes").append(box);
+ });
+}
+$("clientForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ data.clients.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),
+ name:$("clientName").value.trim(),email:$("clientEmail").value.trim(),
+ project:$("clientProject").value.trim(),status:$("clientStatus").value,notes:$("clientNotes").value.trim()});
+ save();e.target.reset();$("clientMessage").textContent="Client saved successfully.";
+});
+$("projectForm").addEventListener("submit",e=>{
+ e.preventDefault();data.projects.push({id:String(Date.now()),name:$("projectName").value.trim(),
+ client:$("projectClient").value.trim(),status:$("projectStatus").value});
+ save();e.target.reset();
+});
+$("quickTask").addEventListener("submit",e=>{
+ e.preventDefault();data.tasks.push({id:String(Date.now()),name:$("taskName").value.trim(),due:$("taskDue").value,done:false});
+ save();e.target.reset();$("taskMessage").textContent="Task created.";
+});
+$("noteForm").addEventListener("submit",e=>{
+ e.preventDefault();data.notes.push({id:String(Date.now()),title:$("noteTitle").value.trim(),body:$("noteBody").value.trim()});
+ save();e.target.reset();
+});
+$("clientSearch").addEventListener("input",renderClients);
+$("globalSearch").addEventListener("input",()=>{
+ if($("globalSearch").value)go("clients-view");
+ renderClients();
+});
+$("exportData").onclick=()=>{
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob),a=element("a","Download");
+ a.href=url;a.download="clientflow-workspace.json";a.click();URL.revokeObjectURL(url);
+};
+$("clearData").onclick=()=>{
+ if(confirm("Permanently clear this browser's ClientFlow data?")){
+ data={clients:[],projects:[],tasks:[],notes:[]};save();$("settingsMessage").textContent="Local workspace cleared.";
+ }
+};
+render();
+</script>
+</body>
+</html>
